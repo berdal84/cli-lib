@@ -2,6 +2,6 @@
 #include "cli-lib.h"
 
 int main() {
-    hello();
+    clilib::say_hello();
     return 0;
 }
