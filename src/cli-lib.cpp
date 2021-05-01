@@ -10,7 +10,7 @@ void clilib::say_hello()
     std::cout << "Hello, World!" << std::endl;
 }
 
-bool clilib::parse(const char **argv, int argc, std::vector<const clilib::param*> &outResult)
+bool clilib::parse(int argc, const char **argv, std::vector<const clilib::param *> &outResult)
 {
     for (int i = 1; i < argc; ++i )
     {
@@ -31,6 +31,11 @@ bool clilib::parse(const char **argv, int argc, std::vector<const clilib::param*
             }
         }
     }
+
+    std::cout << "clilib detect " << outResult.size() << " param(s)." << std::endl;
+    for(auto& each : outResult)
+        if( each->action ) each->action();
+
     return true;
 }
 

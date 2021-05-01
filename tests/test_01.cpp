@@ -21,7 +21,7 @@ namespace
         int argc = 4;
 
         // act
-        clilib::parse( args, argc, params);
+        clilib::parse(argc, args, params);
 
         // test
         EXPECT_EQ(params.size(), 2);

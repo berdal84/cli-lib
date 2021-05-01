@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace clilib
 {
@@ -11,10 +12,11 @@ namespace clilib
         const char flag_letter;
         const char flag_word[20];
         const char description[50];
+        std::function<void()> action;
     };
 
     void say_hello();
-    bool parse(const char **argv, int argc, std::vector<const clilib::param*> &outResult);
+    bool parse(int argc, const char **argv, std::vector<const clilib::param *> &outResult);
     void declare_param(clilib::param);
 
     namespace internal {
