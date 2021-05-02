@@ -10,7 +10,7 @@ void clilib::say_hello()
     std::cout << "Hello, World!" << std::endl;
 }
 
-bool clilib::parse(int argc, const char **argv, std::vector<const clilib::param *> &outResult)
+bool clilib::parse(int argc, const char **argv, clilib::params &outResult)
 {
     for (int i = 1; i < argc; ++i )
     {
@@ -23,7 +23,7 @@ bool clilib::parse(int argc, const char **argv, std::vector<const clilib::param 
             {
                 auto found = std::find_if( params_registry.begin(), params_registry.end(), [&arg](param& item) { return  item.flag_letter == arg[1];  } );
                 if ( found != params_registry.end() )
-                    outResult.push_back(&(*found));
+                    outResult.push_back(*found);
             }
             else
             {
@@ -34,12 +34,17 @@ bool clilib::parse(int argc, const char **argv, std::vector<const clilib::param 
 
     std::cout << "clilib detect " << outResult.size() << " param(s)." << std::endl;
     for(auto& each : outResult)
-        if( each->action ) each->action();
+        if( each.action ) each.action();
 
     return true;
 }
 
-void clilib::declare_param(clilib::param p)
+void clilib::decl_param(const clilib::param& param)
 {
-    params_registry.emplace_back(p);
+    params_registry.push_back(param);
+}
+
+void clilib::decl_params(clilib::params& params)
+{
+    params_registry = std::move(params);
 }

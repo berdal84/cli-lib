@@ -1,26 +1,30 @@
 #ifndef CLI_LIB_H
 #define CLI_LIB_H
 
+#include <utility>
 #include <vector>
 #include <string>
 #include <functional>
 
 namespace clilib
 {
+
     struct param
     {
         const char flag_letter;
-        const char flag_word[20];
-        const char description[50];
+        std::string flag_word;
+        std::string description;
         std::function<void()> action;
     };
 
-    void say_hello();
-    bool parse(int argc, const char **argv, std::vector<const clilib::param *> &outResult);
-    void declare_param(clilib::param);
+    typedef std::vector<clilib::param> params;
 
+    void say_hello();
+    bool parse(int argc, const char **argv, params& outResult);
+    void decl_param(const param& );
+    void decl_params(params&);
     namespace internal {
-        static std::vector<clilib::param> params_registry;
+        static params params_registry;
     }
 }
 

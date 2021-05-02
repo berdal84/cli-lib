@@ -1,6 +1,6 @@
 A try to make a library to facilitate command line argument parsing.
 
-First, I want to be able to define a set of flags or typed parameters.
+First, I want to be able to define a set of flags or typed params.
 Some examples:
 
 - flag fullscreen can be enable using `-f | --fullscreen`,
