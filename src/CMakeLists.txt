@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
-project(cli-lib)
+project(cli-lib C)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 90)
 
-add_library(cli-lib cli-lib.cpp cli-lib.h)
+add_library(cli-lib cli-lib.c cli-lib.h)
