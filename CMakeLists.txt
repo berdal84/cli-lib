@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 project(example)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_FLAGS_DEBUG -DCLILIB_DEBUG) # to compile clilib with detailed logs in debug only
 
 # Google Test
 #============
