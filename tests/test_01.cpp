@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "cli-lib.h"
+#include "clib.h"
 
 namespace
 {
@@ -8,20 +8,20 @@ namespace
 
     TEST(Parse, SimpleFlag)
     {
-        clilib_init();
+        clib_init();
 
         // prepare clilib with some expected result
-        clilib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
-        clilib_param g_param = { 'g', "gradient", "enable gradient ui", g };
-        clilib_decl_param(&f_param);
-        clilib_decl_param(&g_param);
+        clib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        clib_param g_param = { 'g', "gradient", "enable gradient ui", g };
+        clib_decl_param(&f_param);
+        clib_decl_param(&g_param);
 
         // prepare C arguments, to simulate main(const char** argv, int argc )
         const char* args[]{"executable", "-f", "f", "-g"};
         int argc = sizeof(args) / sizeof(void*);
 
         // act
-        const clilib_parsing_result* result = clilib_parse(argc, args);
+        const clib_parsing_result* result = clib_parse(argc, args);
 
         // test
         EXPECT_TRUE(result->params);
@@ -30,7 +30,7 @@ namespace
         EXPECT_EQ(result->count, 2);
 
         // free mem
-        clilib_shutdown();
+        clib_shutdown();
     }
 
 }  // namespace

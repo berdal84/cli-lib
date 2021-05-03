@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 project(example)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_FLAGS_DEBUG -DCLILIB_DEBUG) # to compile clilib with detailed logs in debug only
+set(CMAKE_C_FLAGS_DEBUG -DCLIB_DEBUG) # to compile clib with detailed logs in debug only
 
 # Google Test
 #============
@@ -21,7 +21,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(./src)
 include_directories(./src)
-link_libraries(cli-lib)
+link_libraries(clib)
 
 # Executables
 #============
@@ -29,6 +29,6 @@ add_executable(example_01 examples/example_01.cpp)
 
 add_executable(test_01 tests/test_01.cpp)
 target_link_libraries(test_01 gtest_main)
-target_link_libraries(test_01 cli-lib)
+target_link_libraries(test_01 clib)
 
 add_test(NAME tests COMMAND test_01)

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "cli-lib.h"
+#include "clib.h"
 
 void help_message()
 {
@@ -9,22 +9,22 @@ void help_message()
 int main(int argc, const char** argv )
 {
     // mem init
-    clilib_init();
+    clib_init();
 
     // setup clilib with some params
-    struct clilib_param param = {
+    struct clib_param param = {
         'h',
         "help",
         "show program help",
         help_message
     };
-    clilib_decl_param(&param);
+    clib_decl_param(&param);
 
     // "parse"
-    clilib_parse(argc, argv);
+    clib_parse(argc, argv);
 
     // mem free
-    clilib_shutdown();
+    clib_shutdown();
 
     return 0;
 }
