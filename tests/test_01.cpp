@@ -8,6 +8,7 @@ namespace
 
     TEST(Parse, SimpleFlag)
     {
+        clilib_init();
 
         // prepare clilib with some expected result
         clilib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
@@ -17,16 +18,19 @@ namespace
 
         // prepare C arguments, to simulate main(const char** argv, int argc )
         const char* args[]{"executable", "-f", "f", "-g"};
-        int argc = sizeof(args) / sizeof(const char*);
+        int argc = sizeof(args) / sizeof(void*);
 
         // act
-        clilib_parsing_result result = clilib_parse(argc, args);
+        const clilib_parsing_result* result = clilib_parse(argc, args);
 
         // test
-        EXPECT_TRUE(result.params);
-        EXPECT_STREQ(result.params[0]->flag_word, f_param.flag_word);
-        EXPECT_STREQ(result.params[1]->flag_word, g_param.flag_word);
-        EXPECT_EQ(result.count, 2);
+        EXPECT_TRUE(result->params);
+        EXPECT_STREQ(result->params[0]->flag_word, f_param.flag_word);
+        EXPECT_STREQ(result->params[1]->flag_word, g_param.flag_word);
+        EXPECT_EQ(result->count, 2);
+
+        // free mem
+        clilib_shutdown();
     }
 
 }  // namespace

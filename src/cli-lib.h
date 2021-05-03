@@ -23,9 +23,11 @@ typedef struct clilib_result
     size_t          count;
 } clilib_parsing_result;
 
+extern void            clilib_init();
+extern void            clilib_shutdown();
 extern clilib_param*   clilib_find_param_with_letter(char letter);
 extern void            clilib_say_hello();
-extern clilib_parsing_result   clilib_parse(int argc, const char **argv);
+extern const clilib_parsing_result* clilib_parse(int argc, const char **argv);
 extern void            clilib_decl_param(const clilib_param* );
 extern void            clilib_decl_params(int param_count, const clilib_param* param_vector[] );
 extern void            clilib_resize_register(size_t desired_size);

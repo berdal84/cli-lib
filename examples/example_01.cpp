@@ -8,6 +8,9 @@ void help_message()
 
 int main(int argc, const char** argv )
 {
+    // mem init
+    clilib_init();
+
     // setup clilib with some params
     struct clilib_param param = {
         'h',
@@ -19,7 +22,10 @@ int main(int argc, const char** argv )
 
     // "parse"
     clilib_param** result = nullptr;
-    clilib_parse(argc, argv, NULL, 0);
+    clilib_parse(argc, argv);
+
+    // mem free
+    clilib_shutdown();
 
     return 0;
 }

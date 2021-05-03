@@ -4,22 +4,54 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-static clilib_param** registry      = NULL;
-static size_t         registry_size = 0;
+static clilib_param**        registry;
+static size_t                registry_size;
+static clilib_parsing_result last_parsing_result;
+
+void clilib_init()
+{
+    printf("clilib initialization...\n");
+
+    registry      = NULL;
+    registry_size = 0;
+    last_parsing_result.params = NULL;
+    last_parsing_result.count  = 0;
+
+    printf("clilib is initialized.\n");
+}
+
+void clilib_shutdown()
+{
+    printf("clilib is shutting down...\n");
+
+    size_t i;
+    for( i = 0; i < registry_size; ++i)
+    {
+        printf(" - freeing registry[%lu]\n", i);
+        free(registry[i]);
+    }
+    printf(" - freeing registry\n");
+
+    free(registry);
+
+    registry_size = 0;
+
+    printf("clilib is shutdown.\n");
+}
 
 void clilib_say_hello()
 {
-    printf("Hello, World!\n");
+    printf("clilib says: Hello, World!\n");
 }
 
-clilib_parsing_result clilib_parse(int argc, const char **argv)
+const clilib_parsing_result* clilib_parse(int argc, const char **argv)
 {
     printf("clilib parsing (%i arguments)...\n", argc);
 
-    clilib_parsing_result result = {
-        malloc(sizeof( clilib_param* ) ),
-        0
-    };
+    free( last_parsing_result.params );
+
+    last_parsing_result.params = malloc(0);
+    last_parsing_result.count = 0;
 
     printf("clilib info: ignoring first param (binary path)\n");
     int arg_idx;
@@ -37,10 +69,10 @@ clilib_parsing_result clilib_parse(int argc, const char **argv)
                 clilib_param* found = clilib_find_param_with_letter(arg[1]);
                 if ( found != NULL )
                 {
-                    ++(result.count);
+                    ++(last_parsing_result.count);
                     // TODO: realloc better to reduce allocation count (ex: 1, 2, 4, 8, etc.)
-                    result.params = realloc(result.params, result.count * sizeof( clilib_param* ) );
-                    result.params[result.count - 1] = found;
+                    last_parsing_result.params = realloc(last_parsing_result.params, last_parsing_result.count * sizeof( clilib_param* ) );
+                    last_parsing_result.params[last_parsing_result.count - 1] = found;
                     printf("OK.\n");
                 }
                 else
@@ -60,22 +92,22 @@ clilib_parsing_result clilib_parse(int argc, const char **argv)
         }
     }
 
-    printf("clilib detected %lu param(s)\n", result.count);
+    printf("clilib detected %lu param(s)\n", last_parsing_result.count);
     printf("clilib will call callback_fct on each (if defined)...\n");
 
-    for(arg_idx = 0; arg_idx < result.count ; ++arg_idx)
+    for(arg_idx = 0; arg_idx < last_parsing_result.count ; ++arg_idx)
     {
-        if(result.params[arg_idx]->callback_fct != NULL )
+        if(last_parsing_result.params[arg_idx]->callback_fct != NULL )
         {
-            printf("clilib is calling --%s flag's call_back_fct.\n", result.params[arg_idx]->flag_word);
+            printf("clilib is calling --%s flag's call_back_fct.\n", last_parsing_result.params[arg_idx]->flag_word);
 
-            (result.params[arg_idx]->callback_fct)();
+            (last_parsing_result.params[arg_idx]->callback_fct)();
         }
     }
 
-    printf("clilib parsing done (result.count = %lu).\n", result.count);
+    printf("clilib parsing done (last_parsing_result.count = %lu).\n", last_parsing_result.count);
 
-    return result;
+    return &last_parsing_result;
 }
 
 void clilib_decl_param(const clilib_param* param)
