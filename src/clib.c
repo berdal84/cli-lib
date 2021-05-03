@@ -10,9 +10,12 @@ void clib_init()
 {
     CLIB_LOG("clib initialization...\n");
 
-    registry.data = malloc( sizeof( clib_param* ) );
+    registry.capacity = 1;
+    registry.data = calloc( registry.capacity, sizeof( clib_param* ) );
     registry.size = 0;
-    last_parsing_result.data = malloc( sizeof( clib_param* ) );
+
+    last_parsing_result.capacity = 1;
+    last_parsing_result.data = calloc( last_parsing_result.capacity, sizeof( clib_param* ) );
     last_parsing_result.size  = 0;
 
     CLIB_LOG("clib is initialized.\n");
@@ -67,8 +70,12 @@ const clib_params* clib_parse(int argc, const char **argv)
                 if ( found != NULL )
                 {
                     ++(last_parsing_result.size);
-                    // TODO: realloc better to reduce allocation count (ex: 1, 2, 4, 8, etc.)
-                    last_parsing_result.data = reallocarray(last_parsing_result.data, last_parsing_result.size, sizeof( clib_param* ) );
+
+                    if (last_parsing_result.size > last_parsing_result.capacity)
+                        last_parsing_result.capacity *= 2;
+
+                    last_parsing_result.data = reallocarray(last_parsing_result.data, last_parsing_result.capacity, sizeof( clib_param* ) );
+
                     last_parsing_result.data[last_parsing_result.size - 1] = found;
                     CLIB_LOG("OK. (flag is -%s )\n", found->flag_word);
                 }
@@ -121,7 +128,12 @@ void clib_resize_register(size_t desired_size)
     if ( desired_size == registry.size)
         return;
 
-    registry.data = reallocarray(registry.data, desired_size, sizeof( clib_param* ));
+    if ( desired_size > registry.capacity )
+    {
+        registry.capacity *= 2;
+        registry.data = reallocarray(registry.data, desired_size, sizeof( clib_param* ));
+    }
+
     registry.size = desired_size;
 }
 

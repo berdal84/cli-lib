@@ -32,6 +32,7 @@ typedef struct clib_params
 {
     const clib_param** data;
     size_t             size;
+    size_t             capacity;
 } clib_params;
 
 extern void                       clib_init();
