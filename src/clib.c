@@ -11,9 +11,9 @@ void clib_init()
 {
     CLIB_LOG("clib initialization...\n");
 
-    registry.data = NULL;
+    registry.data = malloc( sizeof( clib_param* ) );
     registry.size = 0;
-    last_parsing_result.data = NULL;
+    last_parsing_result.data = malloc( sizeof( clib_param* ) );
     last_parsing_result.size  = 0;
 
     CLIB_LOG("clib is initialized.\n");
@@ -28,7 +28,7 @@ void clib_shutdown()
     for( i = 0; i < registry.size; ++i)
     {
         CLIB_LOG(" - freeing registry[%lu]\n", i);
-        free(registry.data[i]);
+        free((void*)registry.data[i]);
     }
     CLIB_LOG(" - freeing registry\n");
     free(registry.data);
@@ -49,10 +49,6 @@ void clib_say_hello()
 const clib_params* clib_parse(int argc, const char **argv)
 {
     CLIB_LOG("clib parsing (%i arguments)...\n", argc);
-
-    free( last_parsing_result.data );
-
-    last_parsing_result.data = malloc(0);
     last_parsing_result.size = 0;
 
     CLIB_LOG("clib info: ignoring first param (binary path)\n");
@@ -68,14 +64,14 @@ const clib_params* clib_parse(int argc, const char **argv)
             // is a flag (ex: "-f" or "-h")
             if ( arg[1] != '-' && length == 2 )
             {
-                clib_param* found = clib_find_param_with_letter(arg[1]);
+                const clib_param* found = clib_find_param_with_letter(arg[1]);
                 if ( found != NULL )
                 {
                     ++(last_parsing_result.size);
                     // TODO: realloc better to reduce allocation count (ex: 1, 2, 4, 8, etc.)
-                    last_parsing_result.data = realloc(last_parsing_result.data, last_parsing_result.size * sizeof( clib_param* ) );
+                    last_parsing_result.data = reallocarray(last_parsing_result.data, last_parsing_result.size, sizeof( clib_param* ) );
                     last_parsing_result.data[last_parsing_result.size - 1] = found;
-                    CLIB_LOG("OK.\n");
+                    CLIB_LOG("OK. (flag is -%s )\n", found->flag_word);
                 }
                 else
                 {
@@ -126,17 +122,7 @@ void clib_resize_register(size_t desired_size)
     if ( desired_size == registry.size)
         return;
 
-    size_t bytes_required = desired_size * sizeof( clib_param* );
-
-    if ( registry.size != 0 )
-    {
-        registry.data = realloc(registry.data, bytes_required);
-    }
-    else
-    {
-        registry.data = malloc(bytes_required);
-    }
-
+    registry.data = reallocarray(registry.data, desired_size, sizeof( clib_param* ));
     registry.size = desired_size;
 }
 

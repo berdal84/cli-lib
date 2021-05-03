@@ -29,8 +29,8 @@ typedef struct clib_param
 /** struct to store an array of parameters */
 typedef struct clib_params
 {
-    clib_param    **data;
-    size_t          size;
+    const clib_param** data;
+    size_t             size;
 } clib_params;
 
 extern void                       clib_init();
