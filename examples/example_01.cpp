@@ -21,7 +21,6 @@ int main(int argc, const char** argv )
     clilib_decl_param(&param);
 
     // "parse"
-    clilib_param** result = nullptr;
     clilib_parse(argc, argv);
 
     // mem free
