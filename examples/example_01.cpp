@@ -11,7 +11,7 @@ int main(int argc, const char** argv )
     // mem init
     clib_init();
 
-    // setup clilib with some params
+    // setup clilib with some data
     struct clib_param param = {
         'h',
         "help",
