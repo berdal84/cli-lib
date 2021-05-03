@@ -1,8 +1,11 @@
 #ifndef CLIB_H
 #define CLIB_H
 
-// TODO: include cstdlib when using cpp
-#include "stdlib.h"
+#ifdef __cplusplus
+#   include <cstdlib>
+#else
+#   include "stdlib.h"
+#endif
 
 #ifdef CLIB_DEBUG
 #define CLIB_LOG( ... ) printf( __VA_ARGS__ )
