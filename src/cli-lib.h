@@ -3,6 +3,12 @@
 
 #include "stdlib.h"
 
+#ifdef CLILIB_DEBUG
+#define CLILIB_LOG( ... ) printf( __VA_ARGS__ )
+#else
+#define CLILIB_LOG( ... )
+#endif
+
 #ifdef __cplusplus
 extern "C"{
 #endif

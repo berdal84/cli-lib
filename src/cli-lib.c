@@ -10,54 +10,54 @@ static clilib_parsing_result last_parsing_result;
 
 void clilib_init()
 {
-    printf("clilib initialization...\n");
+    CLILIB_LOG("clilib initialization...\n");
 
     registry      = NULL;
     registry_size = 0;
     last_parsing_result.params = NULL;
     last_parsing_result.count  = 0;
 
-    printf("clilib is initialized.\n");
+    CLILIB_LOG("clilib is initialized.\n");
 }
 
 void clilib_shutdown()
 {
-    printf("clilib is shutting down...\n");
+    CLILIB_LOG("clilib is shutting down...\n");
 
     size_t i;
     for( i = 0; i < registry_size; ++i)
     {
-        printf(" - freeing registry[%lu]\n", i);
+        CLILIB_LOG(" - freeing registry[%lu]\n", i);
         free(registry[i]);
     }
-    printf(" - freeing registry\n");
+    CLILIB_LOG(" - freeing registry\n");
 
     free(registry);
 
     registry_size = 0;
 
-    printf("clilib is shutdown.\n");
+    CLILIB_LOG("clilib is shutdown.\n");
 }
 
 void clilib_say_hello()
 {
-    printf("clilib says: Hello, World!\n");
+    CLILIB_LOG("clilib says: Hello, World!\n");
 }
 
 const clilib_parsing_result* clilib_parse(int argc, const char **argv)
 {
-    printf("clilib parsing (%i arguments)...\n", argc);
+    CLILIB_LOG("clilib parsing (%i arguments)...\n", argc);
 
     free( last_parsing_result.params );
 
     last_parsing_result.params = malloc(0);
     last_parsing_result.count = 0;
 
-    printf("clilib info: ignoring first param (binary path)\n");
+    CLILIB_LOG("clilib info: ignoring first param (binary path)\n");
     int arg_idx;
     for (arg_idx = 1; arg_idx < argc; ++arg_idx )
     {
-        printf("clilib parsing argument %i : ", arg_idx);
+        CLILIB_LOG("clilib parsing argument %i : ", arg_idx);
 
         const char *arg = argv[arg_idx];
         size_t length = strlen(arg);
@@ -73,39 +73,39 @@ const clilib_parsing_result* clilib_parse(int argc, const char **argv)
                     // TODO: realloc better to reduce allocation count (ex: 1, 2, 4, 8, etc.)
                     last_parsing_result.params = realloc(last_parsing_result.params, last_parsing_result.count * sizeof( clilib_param* ) );
                     last_parsing_result.params[last_parsing_result.count - 1] = found;
-                    printf("OK.\n");
+                    CLILIB_LOG("OK.\n");
                 }
                 else
                 {
-                    printf("ignored. Reason: no parameter found for this flag.\n");
+                    CLILIB_LOG("ignored. Reason: no parameter found for this flag.\n");
                 }
             }
             // TODO: long flag (ex: "--force" or "--help")
             else
             {
-                printf("ignored. Reason: double dash flag are not yet implemented.\n");
+                CLILIB_LOG("ignored. Reason: double dash flag are not yet implemented.\n");
             }
         }
         else
         {
-            printf("ignored. Reason: argument is not starting with a dash (\"-\" or \"--\"), it is not a flag.\n");
+            CLILIB_LOG("ignored. Reason: argument is not starting with a dash (\"-\" or \"--\"), it is not a flag.\n");
         }
     }
 
-    printf("clilib detected %lu param(s)\n", last_parsing_result.count);
-    printf("clilib will call callback_fct on each (if defined)...\n");
+    CLILIB_LOG("clilib detected %lu param(s)\n", last_parsing_result.count);
+    CLILIB_LOG("clilib will call callback_fct on each (if defined)...\n");
 
     for(arg_idx = 0; arg_idx < last_parsing_result.count ; ++arg_idx)
     {
         if(last_parsing_result.params[arg_idx]->callback_fct != NULL )
         {
-            printf("clilib is calling --%s flag's call_back_fct.\n", last_parsing_result.params[arg_idx]->flag_word);
+            CLILIB_LOG("clilib is calling --%s flag's call_back_fct.\n", last_parsing_result.params[arg_idx]->flag_word);
 
             (last_parsing_result.params[arg_idx]->callback_fct)();
         }
     }
 
-    printf("clilib parsing done (last_parsing_result.count = %lu).\n", last_parsing_result.count);
+    CLILIB_LOG("clilib parsing done (last_parsing_result.count = %lu).\n", last_parsing_result.count);
 
     return &last_parsing_result;
 }

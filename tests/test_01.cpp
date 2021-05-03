@@ -1,4 +1,6 @@
 #include "gtest/gtest.h"
+
+#define CLILIB_DEBUG
 #include "cli-lib.h"
 
 namespace
