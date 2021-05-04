@@ -4,7 +4,19 @@
 #include <stdlib.h>
 #include <assert.h>
 
-static Status clib_status = SHUTDOWN;
+typedef enum {
+    Status_SHUTDOWN = 0,
+    Status_READY,
+    Status_PARSING,
+    Status_COUNT
+} Status;
+
+static Status clib_status = Status_SHUTDOWN;
+static const char* clib_status_strings[Status_COUNT] = {
+    [Status_SHUTDOWN] = "Status_SHUTDOWN",
+    [Status_READY]    = "Status_READY",
+    [Status_PARSING]  = "Status_PARSING"
+};
 static Params registry;
 static Params parse_res;
 
@@ -36,47 +48,32 @@ void clib_buffer_append(Params* buffer, const Param* elem_to_append)
 
 void clib_init()
 {
-    assert(clib_status == SHUTDOWN);
+    assert(clib_status == Status_SHUTDOWN);
     CLIB_LOG("clib initialization...\n");
     clib_buffer_alloc(&registry, 1);
     clib_buffer_alloc(&parse_res, 1);
-    clib_status = READY;
+    clib_status = Status_READY;
     clib_print_status();
 }
 
 void clib_shutdown()
 {
-    assert(clib_status == READY);
+    assert(clib_status == Status_READY);
     CLIB_LOG("clib is shutting down...\n");
     clib_buffer_free(&registry);
     clib_buffer_free(&parse_res);
-    clib_status = SHUTDOWN;
+    clib_status = Status_SHUTDOWN;
     clib_print_status();
 }
 
 void clib_print_status()
 {
-    const char* status_string;
-    switch (clib_status)
-    {
-        case SHUTDOWN:
-            status_string = "SHUTDOWN";
-            break;
-        case READY:
-            status_string = "READY";
-            break;
-        case PARSING:
-            status_string = "PARSING";
-            break;
-        default:
-            assert(0);
-    }
-    CLIB_LOG("clib is %s.\n", status_string);
+    CLIB_LOG("clib is %s.\n", clib_status_strings[clib_status]);
 }
 
 const Params* clib_parse(int argc, const char **argv)
 {
-    clib_status = PARSING;
+    clib_status = Status_PARSING;
 
     CLIB_LOG("clib parsing (%i arguments)...\n", argc);
     CLIB_LOG("clib info: ignoring first param (binary path)\n");
@@ -145,7 +142,7 @@ const Params* clib_parse(int argc, const char **argv)
 
     CLIB_LOG("clib parsing done (parse_res.count = %lu).\n", parse_res.size);
 
-    clib_status = READY;
+    clib_status = Status_READY;
 
     return &parse_res;
 }

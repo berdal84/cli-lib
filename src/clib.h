@@ -35,12 +35,6 @@ typedef struct clib_params
     size_t  capacity;
 } Params;
 
-typedef enum {
-    SHUTDOWN = 0,
-    READY,
-    PARSING
-} Status;
-
 // Public API --------------------------------------------------------------------------
 extern void            clib_decl_param(const Param* );
 extern void            clib_decl_params(int param_count, const Param* param_vector[] );
