@@ -7,10 +7,10 @@
 static clib_params registry;
 static clib_params parse_res;
 
-void clib_create_buffer(clib_params* buffer, size_t reserve)
+void clib_new_buffer(clib_params* buffer, size_t reserve)
 {
     buffer->capacity = reserve;
-    buffer->data = calloc(reserve, sizeof( clib_param ) );
+    buffer->data = malloc(reserve * sizeof( clib_param ) );
     buffer->size = 0;
 
     if( buffer->data == NULL )
@@ -20,30 +20,26 @@ void clib_create_buffer(clib_params* buffer, size_t reserve)
     }
 }
 
+void clib_delete_buffer(clib_params* buffer)
+{
+    free(buffer->data);
+    buffer->size = 0;
+    buffer->capacity = 0;
+}
+
 void clib_init()
 {
     CLIB_LOG("clib initialization...\n");
-
-    clib_create_buffer(&registry, 1);
-    clib_create_buffer(&parse_res, 1);
-
+    clib_new_buffer(&registry, 1);
+    clib_new_buffer(&parse_res, 1);
     CLIB_LOG("clib is initialized.\n");
 }
 
 void clib_shutdown()
 {
     CLIB_LOG("clib is shutting down...\n");
-
-    // free registry
-    free(registry.data);
-    registry.size = 0;
-    registry.capacity = 0;
-
-    // free last result
-    free(parse_res.data);
-    parse_res.size = 0;
-    parse_res.capacity = 0;
-
+    clib_delete_buffer(&registry);
+    clib_delete_buffer(&parse_res);
     CLIB_LOG("clib is shutdown.\n");
 }
 
@@ -55,31 +51,37 @@ void clib_say_hello()
 const clib_params* clib_parse(int argc, const char **argv)
 {
     CLIB_LOG("clib parsing (%i arguments)...\n", argc);
-    parse_res.size = 0;
-
     CLIB_LOG("clib info: ignoring first param (binary path)\n");
     int arg_idx;
     for (arg_idx = 1; arg_idx < argc; ++arg_idx )
     {
-        CLIB_LOG("clib parsing argument %i : ", arg_idx);
-
         const char *arg = argv[arg_idx];
+        CLIB_LOG("clib is parsing argument  %s (idx: %i.) ", arg, arg_idx);
+
         size_t length = strlen(arg);
         if( length >= 2 && arg[0] == '-' )
         {
-            // is a flag (ex: "-f" or "-h")
-            if ( arg[1] != '-' && length == 2 )
+            // is a flag ? (ex: "-f", "-fg" or "-fgh")
+            if ( arg[1] != '-' && length >= 2 )
             {
-                const clib_param* found = clib_find_param_with_letter(arg[1]);
+                size_t arg_char_index = 1;
+                const clib_param* found = clib_find_param_with_letter(arg[arg_char_index]);
+
                 if ( found != NULL )
                 {
-                    clib_grow_buffer(&parse_res, 1);
-                    parse_res.data[parse_res.size - 1] = *found;
-                    CLIB_LOG("OK. (flag is -%s )\n", found->flag_word);
+                    CLIB_LOG("Found: ");
+                    while (found != NULL) {
+                        clib_grow_buffer(&parse_res, 1);
+                        parse_res.data[parse_res.size - 1] = *found;
+                        CLIB_LOG("--%s ", found->flag_word);
+
+                        found = clib_find_param_with_letter(arg[++arg_char_index]);
+                    }
+                    CLIB_LOG("\n");
                 }
                 else
                 {
-                    CLIB_LOG("ignored. Reason: no parameter found for this flag.\n");
+                    CLIB_LOG("Nothing found\n");
                 }
             }
             // TODO: long flag (ex: "--force" or "--help")
@@ -121,8 +123,8 @@ void clib_decl_param(const clib_param* param)
 void clib_grow_buffer(clib_params *buffer, size_t amount)
 {
     assert( amount != 0); // "Why growing with 0 amount ?"
-
-    if ( buffer->capacity < amount + buffer->size  ) // need to allocate more ?
+    buffer->size += amount;
+    if ( buffer->capacity < buffer->size  ) // need to allocate more ?
     {
         buffer->capacity = buffer->capacity == 0 ? 1 : buffer->capacity * 2;
         buffer->data = reallocarray( buffer->data, buffer->capacity, sizeof( clib_param ));
@@ -133,8 +135,6 @@ void clib_grow_buffer(clib_params *buffer, size_t amount)
             exit(1);
         }
     }
-
-    registry.size += amount;
 }
 
 void clib_decl_params( int param_count, const clib_param* param_vector[])

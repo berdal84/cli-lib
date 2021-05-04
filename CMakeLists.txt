@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_C_STANDARD C90)
 set(CMAKE_C_FLAGS_DEBUG -DCLIB_DEBUG) # to compile clib with detailed logs in debug only
+set(CMAKE_C_FLAGS_RELWITHDEBINFO  -DCLIB_DEBUG) # to compile clib with detailed logs in debug only
 
 # Google Test
 #============
