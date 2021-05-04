@@ -37,6 +37,7 @@ typedef struct clib_params
 
 extern void                       clib_init();
 extern void                       clib_shutdown();
+extern const clib_param*          clib_find_param_with_word(const char* word);
 extern const clib_param*          clib_find_param_with_letter(char letter);
 extern void                       clib_say_hello();
 extern const clib_params*         clib_parse(int argc, const char **argv);

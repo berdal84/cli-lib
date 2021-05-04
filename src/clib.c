@@ -27,6 +27,12 @@ void clib_delete_buffer(clib_params* buffer)
     buffer->capacity = 0;
 }
 
+void clib_append_buffer(clib_params* buffer, const clib_param* item)
+{
+    clib_grow_buffer(buffer, 1);
+    buffer->data[parse_res.size - 1] = *item;
+}
+
 void clib_init()
 {
     CLIB_LOG("clib initialization...\n");
@@ -56,38 +62,44 @@ const clib_params* clib_parse(int argc, const char **argv)
     for (arg_idx = 1; arg_idx < argc; ++arg_idx )
     {
         const char *arg = argv[arg_idx];
-        CLIB_LOG("clib is parsing argument  %s (idx: %i.) ", arg, arg_idx);
+        CLIB_LOG("clib is parsing argument  \"%s\" (idx: %i.) ", arg, arg_idx);
 
         size_t length = strlen(arg);
-        if( length >= 2 && arg[0] == '-' )
+
+        // is short flag ? (ex: "-f", "-fg" or "-fgh")
+        if( length >= 2 && arg[0] == '-' && arg[1] != '-')
         {
-            // is a flag ? (ex: "-f", "-fg" or "-fgh")
-            if ( arg[1] != '-' && length >= 2 )
+            size_t arg_char_index = 1;
+            const clib_param* found = clib_find_param_with_letter(arg[arg_char_index]);
+
+            if ( found != NULL )
             {
-                size_t arg_char_index = 1;
-                const clib_param* found = clib_find_param_with_letter(arg[arg_char_index]);
+                CLIB_LOG("Found: ");
+                while (found != NULL) {
+                    clib_append_buffer(&parse_res, found);
+                    CLIB_LOG("-%c ", found->flag_letter);
 
-                if ( found != NULL )
-                {
-                    CLIB_LOG("Found: ");
-                    while (found != NULL) {
-                        clib_grow_buffer(&parse_res, 1);
-                        parse_res.data[parse_res.size - 1] = *found;
-                        CLIB_LOG("--%s ", found->flag_word);
-
-                        found = clib_find_param_with_letter(arg[++arg_char_index]);
-                    }
-                    CLIB_LOG("\n");
+                    found = clib_find_param_with_letter(arg[++arg_char_index]);
                 }
-                else
-                {
-                    CLIB_LOG("Nothing found\n");
-                }
+                CLIB_LOG("\n");
             }
-            // TODO: long flag (ex: "--force" or "--help")
             else
             {
-                CLIB_LOG("ignored. Reason: double dash flag are not yet implemented.\n");
+                CLIB_LOG("Nothing found\n");
+            }
+        }
+        // is flag long ? (ex: --my-flag, --mute or --help)
+        else if ( length > 2 && strncmp(arg, "--", 2) == 0 )
+        {
+            const clib_param* found = clib_find_param_with_word(&arg[2]);
+            if ( found != NULL )
+            {
+                clib_append_buffer(&parse_res, found);
+                CLIB_LOG("Found: --%s\n", found->flag_word);
+            }
+            else
+            {
+                CLIB_LOG("Nothing found\n");
             }
         }
         else
@@ -144,9 +156,21 @@ void clib_decl_params( int param_count, const clib_param* param_vector[])
     int i = 0;
     while(i < param_count )
     {
-        memcpy( &registry.data[registry.size + i],  param_vector[i++], sizeof( clib_param ) );
+        memcpy( &registry.data[registry.size + i],  param_vector[i], sizeof( clib_param ) );
+        i++;
     }
     registry.size += param_count;
+}
+const clib_param* clib_find_param_with_word(const char* word)
+{
+    int i = 0;
+    while( i < registry.size )
+    {
+        if ( strcmp(registry.data[i].flag_word, word) == 0)
+            return &registry.data[i];
+        ++i;
+    }
+    return NULL;
 }
 
 const clib_param* clib_find_param_with_letter(const char letter)
