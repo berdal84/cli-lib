@@ -10,7 +10,7 @@ namespace
     {
         clib_init();
 
-        clib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        Param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
         clib_decl_param(&f_param);
 
         // prepare C arguments, to simulate main(const char** argv, int argc )
@@ -18,7 +18,7 @@ namespace
         int argc = sizeof(args) / sizeof(void*);
 
         // act
-        const clib_params* result = clib_parse(argc, args);
+        const Params* result = clib_parse(argc, args);
 
         // test
         EXPECT_TRUE(result->data);
@@ -34,8 +34,8 @@ namespace
         clib_init();
 
         // prepare clilib with some expected result
-        clib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
-        clib_param g_param = { 'g', "gradient", "enable gradient ui", g };
+        Param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        Param g_param = {'g', "gradient", "enable gradient ui", g };
         clib_decl_param(&f_param);
         clib_decl_param(&g_param);
 
@@ -44,7 +44,7 @@ namespace
         int argc = sizeof(args) / sizeof(void*);
 
         // act
-        const clib_params* result = clib_parse(argc, args);
+        const Params* result = clib_parse(argc, args);
 
         // test
         EXPECT_TRUE(result->data);
@@ -61,8 +61,8 @@ namespace
         clib_init();
 
         // prepare clilib with some expected result
-        clib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
-        clib_param g_param = { 'g', "gradient", "enable gradient ui", g };
+        Param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        Param g_param = {'g', "gradient", "enable gradient ui", g };
         clib_decl_param(&f_param);
         clib_decl_param(&g_param);
 
@@ -71,7 +71,7 @@ namespace
         int argc = sizeof(args) / sizeof(void*);
 
         // act
-        const clib_params* result = clib_parse(argc, args);
+        const Params* result = clib_parse(argc, args);
 
         // test
         EXPECT_TRUE(result->data);
@@ -85,9 +85,10 @@ namespace
 
     TEST(Parse, SingleLongFlag)
     {
+        clib_print_status();
         clib_init();
 
-        clib_param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        Param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
         clib_decl_param(&f_param);
 
         // prepare C arguments, to simulate main(const char** argv, int argc )
@@ -95,7 +96,7 @@ namespace
         int argc = sizeof(args) / sizeof(void*);
 
         // act
-        const clib_params* result = clib_parse(argc, args);
+        const Params* result = clib_parse(argc, args);
 
         // test
         EXPECT_TRUE(result->data);

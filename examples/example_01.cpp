@@ -12,7 +12,7 @@ int main(int argc, const char** argv )
     clib_init();
 
     // setup clilib with some data
-    struct clib_param param = {
+    Param param = {
         'h',
         "help",
         "show program help",

@@ -25,25 +25,36 @@ typedef struct clib_param
     char flag_word[20];
     char description[100];
     void (*callback_fct)();
-} clib_param;
+} Param;
 
 /** struct to store an array of parameters */
 typedef struct clib_params
 {
-    clib_param*  data;
-    size_t       size;
-    size_t       capacity;
-} clib_params;
+    Param*  data;
+    size_t  size;
+    size_t  capacity;
+} Params;
 
-extern void                       clib_init();
-extern void                       clib_shutdown();
-extern const clib_param*          clib_find_param_with_word(const char* word);
-extern const clib_param*          clib_find_param_with_letter(char letter);
-extern void                       clib_say_hello();
-extern const clib_params*         clib_parse(int argc, const char **argv);
-extern void                       clib_decl_param(const clib_param* );
-extern void                       clib_decl_params(int param_count, const clib_param* param_vector[] );
-extern void clib_grow_buffer(clib_params *buffer, size_t amount);
+typedef enum {
+    SHUTDOWN = 0,
+    READY,
+    PARSING
+} Status;
+
+// Public API --------------------------------------------------------------------------
+extern void            clib_decl_param(const Param* );
+extern void            clib_decl_params(int param_count, const Param* param_vector[] );
+extern const Param*    clib_find_param_with_letter(char letter);
+extern const Param*    clib_find_param_with_word(const char* word);
+extern void            clib_init();
+extern const Params*   clib_parse(int argc, const char **argv);
+extern void            clib_print_status();
+extern void            clib_shutdown();
+
+// Internal ----------------------------------------------------------------------------
+extern void            clib_buffer_alloc(Params* buffer, size_t nb_elem_to_reserve);
+extern void            clib_buffer_free(Params* buffer);
+extern void            clib_buffer_grow(Params *buffer, size_t amount);
 
 #ifdef __cplusplus
 }
