@@ -25,8 +25,8 @@ namespace
 
         // test
         EXPECT_TRUE(result->data);
-        EXPECT_STREQ(result->data[0]->flag_word, f_param.flag_word);
-        EXPECT_STREQ(result->data[1]->flag_word, g_param.flag_word);
+        EXPECT_STREQ(result->data[0].flag_word, f_param.flag_word);
+        EXPECT_STREQ(result->data[1].flag_word, g_param.flag_word);
         EXPECT_EQ(result->size, 2);
 
         // free mem

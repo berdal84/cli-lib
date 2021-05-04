@@ -21,18 +21,18 @@ extern "C"{
 /** struct to store a single parameter */
 typedef struct clib_param
 {
-    const char flag_letter;
-    const char flag_word[20];
-    const char description[100];
+    char flag_letter;
+    char flag_word[20];
+    char description[100];
     void (*callback_fct)();
 } clib_param;
 
 /** struct to store an array of parameters */
 typedef struct clib_params
 {
-    const clib_param** data;
-    size_t             size;
-    size_t             capacity;
+    clib_param*  data;
+    size_t       size;
+    size_t       capacity;
 } clib_params;
 
 extern void                       clib_init();
@@ -42,7 +42,7 @@ extern void                       clib_say_hello();
 extern const clib_params*         clib_parse(int argc, const char **argv);
 extern void                       clib_decl_param(const clib_param* );
 extern void                       clib_decl_params(int param_count, const clib_param* param_vector[] );
-extern void                       clib_resize_register(size_t desired_size);
+extern void clib_grow_buffer(clib_params *buffer, size_t amount);
 
 #ifdef __cplusplus
 }
