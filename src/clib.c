@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 typedef enum {
     Status_SHUTDOWN = 0,
@@ -19,6 +20,8 @@ static const char* clib_status_strings[Status_COUNT] = {
 };
 static Params registry;
 static Params parse_res;
+
+inline size_t min(size_t a, size_t b) { return a < b ? a : b; }
 
 void clib_buffer_alloc(Params* buffer, size_t nb_elem_to_reserve)
 {
@@ -42,7 +45,7 @@ void clib_buffer_free(Params* buffer)
 
 void clib_buffer_append(Params* buffer, const Param* elem_to_append)
 {
-    clib_buffer_grow(buffer, 1);
+    clib_buffer_grow_size(buffer, 1);
     buffer->data[parse_res.size - 1] = *elem_to_append;
 }
 
@@ -149,7 +152,7 @@ const Params* clib_parse(int argc, const char **argv)
 
 void clib_decl_param(const Param* param)
 {
-    clib_buffer_grow(&registry, 1);
+    clib_buffer_grow_size(&registry, 1);
     registry.data[registry.size - 1] = *param;
 }
 
@@ -160,13 +163,18 @@ const Params* clib_get_params()
     return &registry;
 }
 
-void clib_buffer_grow(Params *buffer, size_t amount)
+void clib_buffer_grow_size(Params *buffer, size_t amount)
 {
     assert( amount != 0); // "Why growing with 0 amount ?"
     buffer->size += amount;
     if ( buffer->capacity < buffer->size  ) // need to allocate more ?
     {
-        buffer->capacity = buffer->capacity == 0 ? 1 : buffer->capacity * 2;
+        /*
+         * Capacity growing pattern:
+         * - call 1: we allocate for the exact amount asked.
+         * - call n+1: double capacity with a grow limited to CLIB_BUFFER_CAPACITY_GROW_MAX
+         */
+        buffer->capacity = buffer->capacity == 0 ? buffer->size :  buffer->capacity + min( buffer->capacity, CLIB_BUFFER_CAPACITY_GROW_MAX ) ;
         buffer->data     = reallocarray( buffer->data, buffer->capacity, sizeof( Param ));
 
         if ( buffer->data == NULL)
@@ -179,7 +187,7 @@ void clib_buffer_grow(Params *buffer, size_t amount)
 
 void clib_decl_params( int param_count, const Param* param_vector[])
 {
-    clib_buffer_grow(0, registry.size + param_count);
+    clib_buffer_grow_size(0, registry.size + param_count);
 
     int i = 0;
     while(i < param_count )

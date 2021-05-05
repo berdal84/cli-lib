@@ -47,10 +47,12 @@ extern void            clib_shutdown();
 extern int             clib_param_cmp(const Param* lhs, const Param* rhs);
 
 // Internal ----------------------------------------------------------------------------
+
+#define CLIB_BUFFER_CAPACITY_GROW_MAX 256
 extern const Params*   clib_get_params();
 extern void            clib_buffer_alloc(Params* buffer, size_t nb_elem_to_reserve);
 extern void            clib_buffer_free(Params* buffer);
-extern void            clib_buffer_grow(Params *buffer, size_t amount);
+extern void            clib_buffer_grow_size(Params *buffer, size_t amount);
 
 #ifdef __cplusplus
 }

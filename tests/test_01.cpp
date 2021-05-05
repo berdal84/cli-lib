@@ -15,6 +15,76 @@ namespace
         EXPECT_FALSE(clib_param_cmp(&f_param, &f_param_cpy));
     }
 
+    TEST(API, buffer_grow)
+    {
+        clib_init();
+        Params params;
+        clib_buffer_alloc(&params, 0);
+        EXPECT_EQ(params.capacity, 0);
+
+        clib_buffer_grow_size(&params, 1);
+        EXPECT_EQ(params.capacity, 1);
+
+        clib_buffer_grow_size(&params, 1);
+        EXPECT_EQ(params.capacity, 2);
+
+        clib_buffer_grow_size(&params, 1);
+        EXPECT_EQ(params.capacity, 4);
+
+        clib_shutdown();
+    }
+
+    TEST(API, buffer_grow_fast)
+    {
+        clib_init();
+        Params buffer;
+        clib_buffer_alloc(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2 );
+        EXPECT_EQ(buffer.size, 0);
+        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+
+        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_EQ(buffer.capacity, buffer.size);
+
+        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2 );
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX );
+        EXPECT_EQ(buffer.capacity, buffer.size); // should double
+
+        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX + CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX * 2 ); // should double again
+
+        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 2 );
+        EXPECT_EQ(buffer.capacity, buffer.size );
+
+        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 2 + CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        EXPECT_LT(buffer.size, buffer.capacity);
+
+        clib_shutdown();
+    }
+
+    TEST(API, buffer_grow_super_fast)
+    {
+        clib_init();
+        Params buffer;
+
+        clib_buffer_alloc(&buffer, 0 );
+        EXPECT_EQ(buffer.size, 0);
+        EXPECT_EQ(buffer.capacity, 0);
+
+        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024 );
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024);
+        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024);
+
+        clib_buffer_grow_size(&buffer, 1);
+        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024 + 1);
+        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024 + CLIB_BUFFER_CAPACITY_GROW_MAX);
+
+        clib_shutdown();
+    }
+
     TEST(Declare, ASingleParam)
     {
         // prepare
