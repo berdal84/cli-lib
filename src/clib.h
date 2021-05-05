@@ -44,8 +44,10 @@ extern void            clib_init();
 extern const Params*   clib_parse(int argc, const char **argv);
 extern void            clib_print_status();
 extern void            clib_shutdown();
+extern int             clib_param_cmp(const Param* lhs, const Param* rhs);
 
 // Internal ----------------------------------------------------------------------------
+extern const Params*   clib_get_params();
 extern void            clib_buffer_alloc(Params* buffer, size_t nb_elem_to_reserve);
 extern void            clib_buffer_free(Params* buffer);
 extern void            clib_buffer_grow(Params *buffer, size_t amount);

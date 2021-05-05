@@ -153,6 +153,13 @@ void clib_decl_param(const Param* param)
     registry.data[registry.size - 1] = *param;
 }
 
+const Params* clib_get_params()
+{
+    if( clib_status == Status_SHUTDOWN )
+        CLIB_LOG("Please, init clib with clib_init() before doing anything else.");
+    return &registry;
+}
+
 void clib_buffer_grow(Params *buffer, size_t amount)
 {
     assert( amount != 0); // "Why growing with 0 amount ?"
@@ -205,4 +212,12 @@ const Param* clib_find_param_with_letter(const char letter)
         ++i;
     }
     return NULL;
+}
+
+int clib_param_cmp(const Param *lhs, const Param *rhs)
+{
+    return lhs->flag_letter != rhs->flag_letter
+        || strcmp(lhs->flag_word, rhs->flag_word) != 0
+        || lhs->callback_fct != rhs->callback_fct
+        || strcmp(lhs->description, rhs->description) != 0;
 }

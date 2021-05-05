@@ -6,6 +6,35 @@ namespace
     void f(){ std::cout << "fullscreen on." << std::endl; };
     void g(){ std::cout << "gradient on." << std::endl; };
 
+    TEST(API, param_cmp)
+    {
+        Param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        Param f_param_cpy = f_param;
+
+        // test
+        EXPECT_FALSE(clib_param_cmp(&f_param, &f_param_cpy));
+    }
+
+    TEST(Declare, ASingleParam)
+    {
+        // prepare
+        clib_init();
+
+        // act
+        Param f_param = {'f', "fullscreen", "toggle fullscreen automatically", f };
+        clib_decl_param(&f_param);
+
+        // test
+        const Params* params = clib_get_params();
+        EXPECT_EQ(params->size, 1);
+        EXPECT_TRUE(params->data);
+        EXPECT_FALSE(clib_param_cmp(&params->data[0], &f_param));
+
+        // free mem
+        clib_shutdown();
+    }
+
+
     TEST(Parse, SingleShortFlag)
     {
         clib_init();
