@@ -21,7 +21,7 @@ int main(int argc, const char** argv )
     clib_decl_param(&param);
 
     // "parse"
-    clib_parse(argc, argv);
+    clib_parse(argc, argv); // <-- this will call help_message if this program is run using -h or --help flags.
 
     // mem free
     clib_shutdown();

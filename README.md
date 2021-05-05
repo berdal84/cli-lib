@@ -1,4 +1,11 @@
-A try to make a library to facilitate command line argument parsing.
+
+## Brief
+
+CLIB is a try to make a library to facilitate command line argument parsing.
+
+_Note: this kind of this lib already exists, I want to learn how to do this "on my own"._
+
+## Details
 
 First, I want to be able to define a set of flags or typed params.
 Some examples:
@@ -8,9 +15,13 @@ usage: `app -f`
 
 - screen size `-s=640x480 | --screen-size=640x480`
 
-Then I will add commands to able to get flags/params and run some code.
+Then I will add commands whom can get flags/params to perform actions.
+
 Ex: `myprogram command --flag --param=7`
 
 Later, why not to create constraints between flags/params.
 
-Note: this kind of this might exist, but I want to learn how to do this.
+## Help
+
+An example is provided in `examples/example_01.cpp`
+
