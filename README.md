@@ -15,7 +15,7 @@ usage: `app -f`
 
 - screen size `-s=640x480 | --screen-size=640x480`
 
-Then I will add commands whom can get flags/params to perform actions.
+Then I will add commands with the possibility to declare flags/params and to perform actions.
 
 Ex: `myprogram command --flag --param=7`
 
