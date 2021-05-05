@@ -9,9 +9,9 @@
 
 #ifdef CLIB_DEBUG
 #include <stdio.h>
-#define CLIB_LOG( ... ) printf( "[clib] "__VA_ARGS__ )
+#define CLIB_LOG_DBG( ... ) printf( "[clib] "__VA_ARGS__ )
 #else
-#define CLIB_LOG( ... )
+#define CLIB_LOG_DBG( ... )
 #endif
 
 #ifdef __cplusplus
@@ -48,7 +48,7 @@ extern int             clib_param_cmp(const Param* lhs, const Param* rhs);
 
 // Internal ----------------------------------------------------------------------------
 
-#define CLIB_BUFFER_CAPACITY_GROW_MAX 256
+#define CLIB_BUF_CHUNK_SIZE 256
 extern const Params*   clib_get_params();
 extern void            clib_buffer_alloc(Params* buffer, size_t nb_elem_to_reserve);
 extern void            clib_buffer_free(Params* buffer);

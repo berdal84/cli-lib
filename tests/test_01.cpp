@@ -15,74 +15,47 @@ namespace
         EXPECT_FALSE(clib_param_cmp(&f_param, &f_param_cpy));
     }
 
-    TEST(API, buffer_grow)
-    {
-        clib_init();
-        Params params;
-        clib_buffer_alloc(&params, 0);
-        EXPECT_EQ(params.capacity, 0);
-
-        clib_buffer_grow_size(&params, 1);
-        EXPECT_EQ(params.capacity, 1);
-
-        clib_buffer_grow_size(&params, 1);
-        EXPECT_EQ(params.capacity, 2);
-
-        clib_buffer_grow_size(&params, 1);
-        EXPECT_EQ(params.capacity, 4);
-
-        clib_shutdown();
-    }
-
-    TEST(API, buffer_grow_fast)
+    TEST(API, buffer_grow_when_growing_one_by_one)
     {
         clib_init();
         Params buffer;
-        clib_buffer_alloc(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2 );
-        EXPECT_EQ(buffer.size, 0);
-        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
+        clib_buffer_alloc(&buffer, 0); // to be sure first alloc grow_amount will be 1
 
-        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_EQ(buffer.capacity, buffer.size);
+        size_t grow_amount;
+        size_t size = 0;
+        for(grow_amount = 1; grow_amount < 465; ++grow_amount)
+        {
+            size += grow_amount;
+            clib_buffer_grow_size(&buffer, grow_amount);
+            EXPECT_TRUE( buffer.size <= buffer.capacity );
+            EXPECT_TRUE( (buffer.capacity % CLIB_BUF_CHUNK_SIZE) == 0 || buffer.capacity < CLIB_BUF_CHUNK_SIZE );
 
-        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2 );
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX );
-        EXPECT_EQ(buffer.capacity, buffer.size); // should double
-
-        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX + CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX * 2 ); // should double again
-
-        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 2 );
-        EXPECT_EQ(buffer.capacity, buffer.size );
-
-        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 2 + CLIB_BUFFER_CAPACITY_GROW_MAX / 2);
-        EXPECT_LT(buffer.size, buffer.capacity);
-
+            // size should be in  ]cap-chunk_size, cap] interval
+            EXPECT_EQ(buffer.size, size);
+            EXPECT_LE(buffer.size, buffer.capacity);
+            EXPECT_GE(buffer.size + CLIB_BUF_CHUNK_SIZE, buffer.capacity);
+        }
         clib_shutdown();
     }
 
-    TEST(API, buffer_grow_super_fast)
+    TEST(API, buffer_single_grow_above_chunk_size)
     {
-        clib_init();
-        Params buffer;
+        size_t size;
+        for(size = CLIB_BUF_CHUNK_SIZE; size <= 46087; ++size)
+        {
+            clib_init();
+            Params buffer;
+            clib_buffer_alloc(&buffer, 1); // to be sure first alloc size will be 1
+            clib_buffer_grow_size(&buffer, size);
 
-        clib_buffer_alloc(&buffer, 0 );
-        EXPECT_EQ(buffer.size, 0);
-        EXPECT_EQ(buffer.capacity, 0);
+            // size should be size and must be close to capacity +/- chunk size.
+            EXPECT_EQ(buffer.size, size);
+            EXPECT_LE(buffer.size, buffer.capacity);
+            EXPECT_GE(buffer.size + CLIB_BUF_CHUNK_SIZE, buffer.capacity);
 
-        clib_buffer_grow_size(&buffer, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024 );
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024);
-        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024);
-
-        clib_buffer_grow_size(&buffer, 1);
-        EXPECT_EQ(buffer.size, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024 + 1);
-        EXPECT_EQ(buffer.capacity, CLIB_BUFFER_CAPACITY_GROW_MAX * 1024 + CLIB_BUFFER_CAPACITY_GROW_MAX);
-
-        clib_shutdown();
+            EXPECT_EQ(buffer.capacity % CLIB_BUF_CHUNK_SIZE, 0); // must be a multiple of chunk size
+            clib_shutdown();
+        }
     }
 
     TEST(Declare, ASingleParam)

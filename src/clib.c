@@ -31,7 +31,7 @@ void clib_buffer_alloc(Params* buffer, size_t nb_elem_to_reserve)
 
     if( buffer->data == NULL )
     {
-        CLIB_LOG("Unable to initialize pointers !\n");
+        CLIB_LOG_DBG("Unable to initialize pointers !\n");
         exit(1);
     }
 }
@@ -52,7 +52,7 @@ void clib_buffer_append(Params* buffer, const Param* elem_to_append)
 void clib_init()
 {
     assert(clib_status == Status_SHUTDOWN);
-    CLIB_LOG("initialization...\n");
+    CLIB_LOG_DBG("initialization...\n");
     clib_buffer_alloc(&registry, 1);
     clib_buffer_alloc(&parse_res, 1);
     clib_status = Status_READY;
@@ -62,7 +62,7 @@ void clib_init()
 void clib_shutdown()
 {
     assert(clib_status == Status_READY);
-    CLIB_LOG("is shutting down...\n");
+    CLIB_LOG_DBG("is shutting down...\n");
     clib_buffer_free(&registry);
     clib_buffer_free(&parse_res);
     clib_status = Status_SHUTDOWN;
@@ -71,20 +71,20 @@ void clib_shutdown()
 
 void clib_print_status()
 {
-    CLIB_LOG("is %s.\n", clib_status_strings[clib_status]);
+    CLIB_LOG_DBG("is %s.\n", clib_status_strings[clib_status]);
 }
 
 const Params* clib_parse(int argc, const char **argv)
 {
     clib_status = Status_PARSING;
 
-    CLIB_LOG("parsing (%i arguments)...\n", argc);
-    CLIB_LOG("info: ignoring first param (binary path)\n");
+    CLIB_LOG_DBG("parsing (%i arguments)...\n", argc);
+    CLIB_LOG_DBG("info: ignoring first param (binary path)\n");
     int arg_idx;
     for ( arg_idx = 1; arg_idx < argc; ++arg_idx )
     {
         const char *arg = argv[arg_idx];
-        CLIB_LOG("is parsing argument  \"%s\" (idx: %i.) ", arg, arg_idx);
+        CLIB_LOG_DBG("is parsing argument  \"%s\" (idx: %i.) ", arg, arg_idx);
 
         size_t length = strlen(arg);
 
@@ -96,18 +96,18 @@ const Params* clib_parse(int argc, const char **argv)
 
             if ( found != NULL )
             {
-                CLIB_LOG("Found: ");
+                CLIB_LOG_DBG("Found: ");
                 while (found != NULL) {
                     clib_buffer_append(&parse_res, found);
-                    CLIB_LOG("-%c ", found->flag_letter);
+                    CLIB_LOG_DBG("-%c ", found->flag_letter);
 
                     found = clib_find_param_with_letter(arg[++arg_char_index]);
                 }
-                CLIB_LOG("\n");
+                CLIB_LOG_DBG("\n");
             }
             else
             {
-                CLIB_LOG("Nothing found\n");
+                CLIB_LOG_DBG("Nothing found\n");
             }
         }
         // is flag long ? (ex: --my-flag, --mute or --help)
@@ -117,33 +117,33 @@ const Params* clib_parse(int argc, const char **argv)
             if ( found != NULL )
             {
                 clib_buffer_append(&parse_res, found);
-                CLIB_LOG("Found: --%s\n", found->flag_word);
+                CLIB_LOG_DBG("Found: --%s\n", found->flag_word);
             }
             else
             {
-                CLIB_LOG("Nothing found\n");
+                CLIB_LOG_DBG("Nothing found\n");
             }
         }
         else
         {
-            CLIB_LOG("ignored. Reason: argument is not starting with a dash (\"-\" or \"--\"), it is not a flag.\n");
+            CLIB_LOG_DBG("ignored. Reason: argument is not starting with a dash (\"-\" or \"--\"), it is not a flag.\n");
         }
     }
 
-    CLIB_LOG("detected %lu param(s)\n", parse_res.size);
-    CLIB_LOG("will call callback_fct on each (if defined)...\n");
+    CLIB_LOG_DBG("detected %lu param(s)\n", parse_res.size);
+    CLIB_LOG_DBG("will call callback_fct on each (if defined)...\n");
 
     for ( arg_idx = 0; arg_idx < parse_res.size ; ++arg_idx )
     {
         if ( parse_res.data[arg_idx].callback_fct != NULL )
         {
-            CLIB_LOG("is calling --%s flag's call_back_fct.\n", parse_res.data[arg_idx].flag_word);
+            CLIB_LOG_DBG("is calling --%s flag's call_back_fct.\n", parse_res.data[arg_idx].flag_word);
 
             (parse_res.data[arg_idx].callback_fct)();
         }
     }
 
-    CLIB_LOG("parsing done (parse_res.count = %lu).\n", parse_res.size);
+    CLIB_LOG_DBG("parsing done (parse_res.count = %lu).\n", parse_res.size);
 
     clib_status = Status_READY;
 
@@ -159,12 +159,14 @@ void clib_decl_param(const Param* param)
 const Params* clib_get_params()
 {
     if( clib_status == Status_SHUTDOWN )
-        CLIB_LOG("Please, init clib with clib_init() before doing anything else.");
+        CLIB_LOG_DBG("Please, init clib with clib_init() before doing anything else.");
     return &registry;
 }
 
 void clib_buffer_grow_size(Params *buffer, size_t amount)
 {
+    CLIB_LOG_DBG("Desire to grow: %lu, new size: %lu\n", amount, buffer->size + amount );
+
     assert( amount != 0); // "Why growing with 0 amount ?"
     buffer->size += amount;
     if ( buffer->capacity < buffer->size  ) // need to allocate more ?
@@ -172,16 +174,35 @@ void clib_buffer_grow_size(Params *buffer, size_t amount)
         /*
          * Capacity growing pattern:
          * - call 1: we allocate for the exact amount asked.
-         * - call n+1: double capacity with a grow limited to CLIB_BUFFER_CAPACITY_GROW_MAX
+         * - call n+1: double capacity with a grow limited to CLIB_BUF_CHUNK_SIZE multiple
          */
-        buffer->capacity = buffer->capacity == 0 ? buffer->size :  buffer->capacity + min( buffer->capacity, CLIB_BUFFER_CAPACITY_GROW_MAX ) ;
+        size_t capacity_missing = buffer->size - buffer->capacity;
+        size_t desired_capacity = buffer->capacity + capacity_missing;
+        if ( desired_capacity < CLIB_BUF_CHUNK_SIZE / 2 )
+        {
+            if ( desired_capacity < 2 * buffer->capacity)
+                buffer->capacity *= 2;
+            else
+                buffer->capacity = desired_capacity;
+            CLIB_LOG_DBG("Adjust capacity: %lu\n", buffer->capacity);
+        }
+        else
+        {
+            size_t chunk_needed     = desired_capacity / CLIB_BUF_CHUNK_SIZE + 1;
+            buffer->capacity = chunk_needed * CLIB_BUF_CHUNK_SIZE;
+            CLIB_LOG_DBG("Adjust capacity with a multiple: %lu\n", buffer->capacity);
+        }
         buffer->data     = reallocarray( buffer->data, buffer->capacity, sizeof( Param ));
 
         if ( buffer->data == NULL)
         {
-            CLIB_LOG("Unable to resize_buffer !\n");
+            CLIB_LOG_DBG("Unable to resize_buffer !\n");
             exit(1);
         }
+    }
+    else
+    {
+        CLIB_LOG_DBG("No need to change capacity\n");
     }
 }
 
