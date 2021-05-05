@@ -9,7 +9,7 @@
 
 #ifdef CLIB_DEBUG
 #include <stdio.h>
-#define CLIB_LOG( ... ) printf( __VA_ARGS__ )
+#define CLIB_LOG( ... ) printf( "[clib] "__VA_ARGS__ )
 #else
 #define CLIB_LOG( ... )
 #endif

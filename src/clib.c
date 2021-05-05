@@ -49,7 +49,7 @@ void clib_buffer_append(Params* buffer, const Param* elem_to_append)
 void clib_init()
 {
     assert(clib_status == Status_SHUTDOWN);
-    CLIB_LOG("clib initialization...\n");
+    CLIB_LOG("initialization...\n");
     clib_buffer_alloc(&registry, 1);
     clib_buffer_alloc(&parse_res, 1);
     clib_status = Status_READY;
@@ -59,7 +59,7 @@ void clib_init()
 void clib_shutdown()
 {
     assert(clib_status == Status_READY);
-    CLIB_LOG("clib is shutting down...\n");
+    CLIB_LOG("is shutting down...\n");
     clib_buffer_free(&registry);
     clib_buffer_free(&parse_res);
     clib_status = Status_SHUTDOWN;
@@ -68,20 +68,20 @@ void clib_shutdown()
 
 void clib_print_status()
 {
-    CLIB_LOG("clib is %s.\n", clib_status_strings[clib_status]);
+    CLIB_LOG("is %s.\n", clib_status_strings[clib_status]);
 }
 
 const Params* clib_parse(int argc, const char **argv)
 {
     clib_status = Status_PARSING;
 
-    CLIB_LOG("clib parsing (%i arguments)...\n", argc);
-    CLIB_LOG("clib info: ignoring first param (binary path)\n");
+    CLIB_LOG("parsing (%i arguments)...\n", argc);
+    CLIB_LOG("info: ignoring first param (binary path)\n");
     int arg_idx;
     for ( arg_idx = 1; arg_idx < argc; ++arg_idx )
     {
         const char *arg = argv[arg_idx];
-        CLIB_LOG("clib is parsing argument  \"%s\" (idx: %i.) ", arg, arg_idx);
+        CLIB_LOG("is parsing argument  \"%s\" (idx: %i.) ", arg, arg_idx);
 
         size_t length = strlen(arg);
 
@@ -127,20 +127,20 @@ const Params* clib_parse(int argc, const char **argv)
         }
     }
 
-    CLIB_LOG("clib detected %lu param(s)\n", parse_res.size);
-    CLIB_LOG("clib will call callback_fct on each (if defined)...\n");
+    CLIB_LOG("detected %lu param(s)\n", parse_res.size);
+    CLIB_LOG("will call callback_fct on each (if defined)...\n");
 
     for ( arg_idx = 0; arg_idx < parse_res.size ; ++arg_idx )
     {
         if ( parse_res.data[arg_idx].callback_fct != NULL )
         {
-            CLIB_LOG("clib is calling --%s flag's call_back_fct.\n", parse_res.data[arg_idx].flag_word);
+            CLIB_LOG("is calling --%s flag's call_back_fct.\n", parse_res.data[arg_idx].flag_word);
 
             (parse_res.data[arg_idx].callback_fct)();
         }
     }
 
-    CLIB_LOG("clib parsing done (parse_res.count = %lu).\n", parse_res.size);
+    CLIB_LOG("parsing done (parse_res.count = %lu).\n", parse_res.size);
 
     clib_status = Status_READY;
 
