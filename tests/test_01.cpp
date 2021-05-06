@@ -15,7 +15,7 @@ namespace
         EXPECT_FALSE(clib_param_cmp(&f_param, &f_param_cpy));
     }
 
-    TEST(API, buffer_grow_when_growing_one_by_one)
+    TEST(API, buffer_grow_incrementally)
     {
         clib_init();
         Params buffer;
