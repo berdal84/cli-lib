@@ -30,10 +30,10 @@ namespace
             EXPECT_TRUE( buffer.size <= buffer.capacity );
             EXPECT_TRUE( (buffer.capacity % CLIB_BUF_CHUNK_SIZE) == 0 || buffer.capacity < CLIB_BUF_CHUNK_SIZE );
 
-            // size should be in  ]cap-chunk_size, cap] interval
+            // cap should be in  [size, 2 * size[ interval
             EXPECT_EQ(buffer.size, size);
             EXPECT_LE(buffer.size, buffer.capacity);
-            EXPECT_GE(buffer.size + CLIB_BUF_CHUNK_SIZE, buffer.capacity);
+            EXPECT_GT(buffer.size * 2, buffer.capacity);
         }
         clib_shutdown();
     }

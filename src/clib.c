@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <math.h>
+#include <errno.h>
 
 typedef enum {
     Status_SHUTDOWN = 0,
@@ -171,33 +171,26 @@ void clib_buffer_grow_size(Params *buffer, size_t amount)
     buffer->size += amount;
     if ( buffer->capacity < buffer->size  ) // need to allocate more ?
     {
-        /*
-         * Capacity growing pattern:
-         * - call 1: we allocate for the exact amount asked.
-         * - call n+1: double capacity with a grow limited to CLIB_BUF_CHUNK_SIZE multiple
-         */
         size_t capacity_missing = buffer->size - buffer->capacity;
         size_t desired_capacity = buffer->capacity + capacity_missing;
-        if ( desired_capacity < CLIB_BUF_CHUNK_SIZE / 2 )
+
+        // if not small, allocate the double of lower CHUNK_SIZE multiple of the desired_capacity.
+        if ( desired_capacity >= CLIB_BUF_CHUNK_SIZE / 2 )
         {
-            if ( desired_capacity < 2 * buffer->capacity)
-                buffer->capacity *= 2;
-            else
-                buffer->capacity = desired_capacity;
-            CLIB_LOG_DBG("Adjust capacity: %lu\n", buffer->capacity);
+            size_t chunk_needed  = desired_capacity / CLIB_BUF_CHUNK_SIZE + (desired_capacity % CLIB_BUF_CHUNK_SIZE == 0 ? 0 : 1);
+            desired_capacity     = chunk_needed * CLIB_BUF_CHUNK_SIZE;
+            CLIB_LOG_DBG("Adjust capacity with a multiple: %lu\n", desired_capacity);
         }
-        else
-        {
-            size_t chunk_needed     = desired_capacity / CLIB_BUF_CHUNK_SIZE + 1;
-            buffer->capacity = chunk_needed * CLIB_BUF_CHUNK_SIZE;
-            CLIB_LOG_DBG("Adjust capacity with a multiple: %lu\n", buffer->capacity);
-        }
-        buffer->data     = reallocarray( buffer->data, buffer->capacity, sizeof( Param ));
+        buffer->data     = reallocarray( buffer->data, desired_capacity, sizeof( Param ));
 
         if ( buffer->data == NULL)
         {
-            CLIB_LOG_DBG("Unable to resize_buffer !\n");
-            exit(1);
+            printf("Unable to resize_buffer: ERROR %i\n", errno);
+        }
+        else
+        {
+            CLIB_LOG_DBG("Capacity adjusted from %lu to %lu\n", buffer->capacity, desired_capacity);
+            buffer->capacity = desired_capacity;
         }
     }
     else
