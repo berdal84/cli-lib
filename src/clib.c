@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 
 typedef enum {
     Status_SHUTDOWN = 0,
