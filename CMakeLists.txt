@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.19)
-project(example)
+project(clib_dev)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17) # tests and examples are CPP
+set(CMAKE_C_STANDARD C90)  # lib is C
 
-set(CMAKE_C_STANDARD C90)
-set(CMAKE_C_FLAGS_DEBUG -DCLIB_DEBUG) # to compile clib with detailed logs in debug only
-set(CMAKE_C_FLAGS_RELWITHDEBINFO  -DCLIB_DEBUG) # to compile clib with detailed logs in debug only
+set(CLIB_DEBUG off) # when "on" it shows detailed debugging messages for clib
 
 # Google Test
 #============
