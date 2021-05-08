@@ -22,15 +22,33 @@ FetchContent_MakeAvailable(googletest)
 #========
 
 add_subdirectory(./src)
-include_directories(./src)
-link_libraries(clib)
 
 # Executables
 #============
+
+# link & include clib to all targets
+include_directories(./src)
+link_libraries(clib)
+
+# example_01
 add_executable(example_01 examples/example_01.cpp)
 
-add_executable(test_01 tests/test_01.cpp)
-target_link_libraries(test_01 gtest_main)
-target_link_libraries(test_01 clib)
+# tests api
+add_executable(api tests/api.cpp)
+target_link_libraries(api gtest_main)
 
-add_test(NAME tests COMMAND test_01)
+# tests declare
+add_executable(declare tests/declare.cpp)
+target_link_libraries(declare gtest_main)
+
+# tests parsing
+add_executable(parsing tests/parsing.cpp)
+target_link_libraries(parsing gtest_main)
+
+# declare tests (they can be run with ctest)
+enable_testing()
+add_test(test_api api)
+add_test(test_declare declare)
+add_test(test_parsing parsing)
+add_test(test_example_01a example_01 --help)
+add_test(test_example_01b example_01 --hello -h)
