@@ -1,4 +1,5 @@
 
+![workflow status](https://github.com/berdal84/clib/actions/workflows/build.yml/badge.svg?branch=main)
 ![workflow status](https://github.com/berdal84/clib/actions/workflows/ctest.yml/badge.svg?branch=main)
 
 ## Brief
