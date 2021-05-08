@@ -1,4 +1,6 @@
 
+![workflow status](https://github.com/berdal84/clib/actions/workflows/ctest.yml/badge.svg?branch=main)
+
 ## Brief
 
 CLIB is a try to make a library to facilitate command line argument parsing.
